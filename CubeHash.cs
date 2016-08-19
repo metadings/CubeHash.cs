@@ -30,15 +30,15 @@ using System.Security.Cryptography;
 
 namespace Crypto
 {
-    public class CubeHash224 : CubeHash { public CubeHash224() : base(224) { } }
+	public class CubeHash224 : CubeHash { public CubeHash224() : base(224) { } }
 
-    public class CubeHash256 : CubeHash { public CubeHash256() : base(256) { } }
+	public class CubeHash256 : CubeHash { public CubeHash256() : base(256) { } }
 
 	public class CubeHash384 : CubeHash { public CubeHash384() : base(384) { } }
 
 	public class CubeHash512 : CubeHash { public CubeHash512() : base(512) { } }
 
-    public class CubeHash : HashAlgorithm // IDisposable
+	public class CubeHash : HashAlgorithm // IDisposable
 	{
 		public static uint BytesToUInt32(byte[] buffer, int offset)
 		{
@@ -79,7 +79,7 @@ namespace Crypto
 		{
 			this.hashSize = hashSize;
 			// _blockSize = blockSize;
-        }
+		}
 
 		private bool _isInitialized = false;
 
@@ -137,7 +137,7 @@ namespace Crypto
 	crypto_uint32 u = *data;
 	u <<= 8 * ((state->pos / 8) % 4);
 	state->x[state->pos / 32] ^= u; /**/
-						
+
 						TransformBlock(buffer, blockBytesDone);
 					}
 					blockBytesDone = --blocksDone * BlockSizeInBytes;
@@ -159,7 +159,7 @@ namespace Crypto
 		}
 
 		public virtual byte[] Final()
-        {
+		{
 			var result = new byte[(int)HashSize / 8];
 			Final(result);
 			return result;
@@ -173,7 +173,7 @@ namespace Crypto
 	u = (128 >> (state->pos % 8));
 	u <<= 8 * ((state->pos / 8) % 4);
 	state->x[state->pos / 32] ^= u; /**/
-			
+
 			buffer[bufferFilled++] = 0x80;
 			for (int i = bufferFilled; i < buffer.Length; ++i) buffer[i] = 0x00;
 			TransformBlock();
@@ -212,7 +212,7 @@ namespace Crypto
 		}
 
 		protected virtual void TransformBlock(byte[] data, int start)
-        {
+		{
 			if (data != null)
 			{
 				for (int i = 0; i < (BlockSizeInBytes / 4); i++)
@@ -255,41 +255,41 @@ namespace Crypto
 			uint y0, y1, y2, y3, y4, y5, y6, y7;
 			uint y8, y9, yA, yB, yC, yD, yE, yF;
 
-            for (int r = 0; r < ROUNDS; ++r)
-            {
-                state10 += state00;
-                state11 += state01;
-                state12 += state02;
-                state13 += state03;
-                state14 += state04;
-                state15 += state05;
-                state16 += state06;
-                state17 += state07;
-                state18 += state08;
-                state19 += state09;
-                state1A += state0A;
-                state1B += state0B;
-                state1C += state0C;
-                state1D += state0D;
-                state1E += state0E;
-                state1F += state0F;
+			for (int r = 0; r < ROUNDS; ++r)
+			{
+				state10 += state00;
+				state11 += state01;
+				state12 += state02;
+				state13 += state03;
+				state14 += state04;
+				state15 += state05;
+				state16 += state06;
+				state17 += state07;
+				state18 += state08;
+				state19 += state09;
+				state1A += state0A;
+				state1B += state0B;
+				state1C += state0C;
+				state1D += state0D;
+				state1E += state0E;
+				state1F += state0F;
 
-                y8 = state00;
-                y9 = state01;
+				y8 = state00;
+				y9 = state01;
 				yA = state02;
-                yB = state03;
-                yC = state04;
-                yD = state05;
-                yE = state06;
-                yF = state07;
-                y0 = state08;
-                y1 = state09;
-                y2 = state0A;
-                y3 = state0B;
-                y4 = state0C;
-                y5 = state0D;
-                y6 = state0E;
-                y7 = state0F;
+				yB = state03;
+				yC = state04;
+				yD = state05;
+				yE = state06;
+				yF = state07;
+				y0 = state08;
+				y1 = state09;
+				y2 = state0A;
+				y3 = state0B;
+				y4 = state0C;
+				y5 = state0D;
+				y6 = state0E;
+				y7 = state0F;
 
 				state00 = ((y0 << 7) | (y0 >> (32 - 7))); // ROTATE(y0, 7);
 				state01 = ((y1 << 7) | (y1 >> (32 - 7))); // ROTATE(y1, 7);
@@ -308,90 +308,90 @@ namespace Crypto
 				state0E = ((yE << 7) | (yE >> (32 - 7))); // ROTATE(yE, 7);
 				state0F = ((yF << 7) | (yF >> (32 - 7))); // ROTATE(yF, 7);
 
-                state00 ^= state10;
-                state01 ^= state11;
-                state02 ^= state12;
-                state03 ^= state13;
-                state04 ^= state14;
-                state05 ^= state15;
-                state06 ^= state16;
-                state07 ^= state17;
-                state08 ^= state18;
-                state09 ^= state19;
-                state0A ^= state1A;
-                state0B ^= state1B;
-                state0C ^= state1C;
-                state0D ^= state1D;
-                state0E ^= state1E;
-                state0F ^= state1F;
+				state00 ^= state10;
+				state01 ^= state11;
+				state02 ^= state12;
+				state03 ^= state13;
+				state04 ^= state14;
+				state05 ^= state15;
+				state06 ^= state16;
+				state07 ^= state17;
+				state08 ^= state18;
+				state09 ^= state19;
+				state0A ^= state1A;
+				state0B ^= state1B;
+				state0C ^= state1C;
+				state0D ^= state1D;
+				state0E ^= state1E;
+				state0F ^= state1F;
 
-                y2 = state10;
-                y3 = state11;
-                y0 = state12;
-                y1 = state13;
-                y6 = state14;
-                y7 = state15;
-                y4 = state16;
-                y5 = state17;
-                yA = state18;
-                yB = state19;
-                y8 = state1A;
-                y9 = state1B;
-                yE = state1C;
-                yF = state1D;
-                yC = state1E;
-                yD = state1F;
+				y2 = state10;
+				y3 = state11;
+				y0 = state12;
+				y1 = state13;
+				y6 = state14;
+				y7 = state15;
+				y4 = state16;
+				y5 = state17;
+				yA = state18;
+				yB = state19;
+				y8 = state1A;
+				y9 = state1B;
+				yE = state1C;
+				yF = state1D;
+				yC = state1E;
+				yD = state1F;
 
-                state10 = y0;
-                state11 = y1;
-                state12 = y2;
-                state13 = y3;
-                state14 = y4;
-                state15 = y5;
-                state16 = y6;
-                state17 = y7;
-                state18 = y8;
-                state19 = y9;
-                state1A = yA;
-                state1B = yB;
-                state1C = yC;
-                state1D = yD;
-                state1E = yE;
-                state1F = yF;
+				state10 = y0;
+				state11 = y1;
+				state12 = y2;
+				state13 = y3;
+				state14 = y4;
+				state15 = y5;
+				state16 = y6;
+				state17 = y7;
+				state18 = y8;
+				state19 = y9;
+				state1A = yA;
+				state1B = yB;
+				state1C = yC;
+				state1D = yD;
+				state1E = yE;
+				state1F = yF;
 
-                state10 += state00;
-                state11 += state01;
-                state12 += state02;
-                state13 += state03;
-                state14 += state04;
-                state15 += state05;
-                state16 += state06;
-                state17 += state07;
-                state18 += state08;
-                state19 += state09;
-                state1A += state0A;
-                state1B += state0B;
-                state1C += state0C;
-                state1D += state0D;
-                state1E += state0E;
-                state1F += state0F;
+				state10 += state00;
+				state11 += state01;
+				state12 += state02;
+				state13 += state03;
+				state14 += state04;
+				state15 += state05;
+				state16 += state06;
+				state17 += state07;
+				state18 += state08;
+				state19 += state09;
+				state1A += state0A;
+				state1B += state0B;
+				state1C += state0C;
+				state1D += state0D;
+				state1E += state0E;
+				state1F += state0F;
 
-                y4 = state00;
-                y5 = state01;
-                y6 = state02;
-                y7 = state03;
-                y0 = state04;
-                y1 = state05;
-                y2 = state06;
-                y3 = state07;
-                yC = state08;
-                yD = state09;
-                yE = state0A;
-                yF = state0B;
-                y8 = state0C;
-                y9 = state0D;
-                yA = state0E;
-                yB = state0F;
+				y4 = state00;
+				y5 = state01;
+				y6 = state02;
+				y7 = state03;
+				y0 = state04;
+				y1 = state05;
+				y2 = state06;
+				y3 = state07;
+				yC = state08;
+				yD = state09;
+				yE = state0A;
+				yF = state0B;
+				y8 = state0C;
+				y9 = state0D;
+				yA = state0E;
+				yB = state0F;
 
 				state00 = ((y0 << 11) | (y0 >> (32 - 11))); // ROTATE(y0, 11);
 				state01 = ((y1 << 11) | (y1 >> (32 - 11))); // ROTATE(y1, 11);
@@ -410,57 +410,57 @@ namespace Crypto
 				state0E = ((yE << 11) | (yE >> (32 - 11))); // ROTATE(yE, 11);
 				state0F = ((yF << 11) | (yF >> (32 - 11))); // ROTATE(yF, 11);
 
-                state00 ^= state10;
-                state01 ^= state11;
-                state02 ^= state12;
-                state03 ^= state13;
-                state04 ^= state14;
-                state05 ^= state15;
-                state06 ^= state16;
-                state07 ^= state17;
-                state08 ^= state18;
-                state09 ^= state19;
-                state0A ^= state1A;
-                state0B ^= state1B;
-                state0C ^= state1C;
-                state0D ^= state1D;
-                state0E ^= state1E;
-                state0F ^= state1F;
+				state00 ^= state10;
+				state01 ^= state11;
+				state02 ^= state12;
+				state03 ^= state13;
+				state04 ^= state14;
+				state05 ^= state15;
+				state06 ^= state16;
+				state07 ^= state17;
+				state08 ^= state18;
+				state09 ^= state19;
+				state0A ^= state1A;
+				state0B ^= state1B;
+				state0C ^= state1C;
+				state0D ^= state1D;
+				state0E ^= state1E;
+				state0F ^= state1F;
 
-                y1 = state10;
-                y0 = state11;
-                y3 = state12;
-                y2 = state13;
-                y5 = state14;
-                y4 = state15;
-                y7 = state16;
-                y6 = state17;
-                y9 = state18;
-                y8 = state19;
-                yB = state1A;
-                yA = state1B;
-                yD = state1C;
-                yC = state1D;
-                yE = state1E;
-                yF = state1F;
+				y1 = state10;
+				y0 = state11;
+				y3 = state12;
+				y2 = state13;
+				y5 = state14;
+				y4 = state15;
+				y7 = state16;
+				y6 = state17;
+				y9 = state18;
+				y8 = state19;
+				yB = state1A;
+				yA = state1B;
+				yD = state1C;
+				yC = state1D;
+				yE = state1E;
+				yF = state1F;
 
-                state10 = y0;
-                state11 = y1;
-                state12 = y2;
-                state13 = y3;
-                state14 = y4;
-                state15 = y5;
-                state16 = y6;
-                state17 = y7;
-                state18 = y8;
-                state19 = y9;
-                state1A = yA;
-                state1B = yB;
-                state1C = yC;
-                state1D = yD;
-                state1E = yE;
-                state1F = yF;
-            }
+				state10 = y0;
+				state11 = y1;
+				state12 = y2;
+				state13 = y3;
+				state14 = y4;
+				state15 = y5;
+				state16 = y6;
+				state17 = y7;
+				state18 = y8;
+				state19 = y9;
+				state1A = yA;
+				state1B = yB;
+				state1C = yC;
+				state1D = yD;
+				state1E = yE;
+				state1F = yF;
+			}
 
 			state[0] = state00;
 			state[1] = state01;
@@ -494,7 +494,7 @@ namespace Crypto
 			state[29] = state1D;
 			state[30] = state1E;
 			state[31] = state1F;
-        }
+		}
 
-    }
+	}
 }
