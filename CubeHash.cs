@@ -9,21 +9,12 @@
 	You should have received a copy of the CC0 Public Domain Dedication along with
 	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 */
-/*	based on supercop-20141124/crypto_hash/cubehash512/unrolled
+/*	Based on supercop-20141124/crypto_hash/cubehash512/unrolled
+	     and supercop-20141124/crypto_hash/cubehash512/unrolled3
 
-	20100623
+	20100623, 20100917
 	D. J. Bernstein
 	Public domain.
-
-	Implementation strategy suggested by Scott McMurray.
-*/
-/*	based on supercop-20141124/crypto_hash/cubehash512/unrolled3
-
-	20100917
-	D. J. Bernstein
-	Public domain.
-
-	Compressed version of unrolled2, plus better locality in inner loop.
 */
 using System;
 using System.Security.Cryptography;

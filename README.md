@@ -11,21 +11,12 @@ worldwide. This software is distributed without any warranty.
 You should have received a copy of the CC0 Public Domain Dedication along with
 this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
-Based on supercop-20141124/crypto_hash/cubehash512/unrolled:
+Based on supercop-20141124/crypto_hash/cubehash512/unrolled
+     and supercop-20141124/crypto_hash/cubehash512/unrolled3
 
-20100623
+20100623, 20100917
 D. J. Bernstein
 Public domain.
-
-Implementation strategy suggested by Scott McMurray.
-
-Based on supercop-20141124/crypto_hash/cubehash512/unrolled3:
-
-20100917
-D. J. Bernstein
-Public domain.
-
-Compressed version of unrolled2, plus better locality in inner loop.
 ```
 
 Ask questions on [stackoverflow](http://stackoverflow.com/questions/tagged/c%23+cubehash) using tags `C#``CubeHash` !
