@@ -1,5 +1,32 @@
+/*	CubeHash.cs source code package - C# implementation
+
+	Written in 2016 by Uli Riehm <metadings@live.de>
+
+	To the extent possible under law, the author(s) have dedicated all copyright
+	and related and neighboring rights to this software to the public domain
+	worldwide. This software is distributed without any warranty.
+
+	You should have received a copy of the CC0 Public Domain Dedication along with
+	this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
+*/
+/*	based on supercop-20141124/crypto_hash/cubehash512/unrolled
+
+	20100623
+	D. J. Bernstein
+	Public domain.
+
+	Implementation strategy suggested by Scott McMurray.
+*/
+/*	based on supercop-20141124/crypto_hash/cubehash512/unrolled3
+
+	20100917
+	D. J. Bernstein
+	Public domain.
+
+	Compressed version of unrolled2, plus better locality in inner loop.
+*/
 using System;
-using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace Crypto
 {
@@ -11,7 +38,7 @@ namespace Crypto
 
 	public class CubeHash512 : CubeHash { public CubeHash512() : base(512) { } }
 
-    public class CubeHash : IDisposable
+    public class CubeHash : HashAlgorithm // IDisposable
 	{
 		public static uint BytesToUInt32(byte[] buffer, int offset)
 		{
@@ -32,7 +59,7 @@ namespace Crypto
 
 		private readonly int hashSize;
 
-		public virtual int HashSize { get { return hashSize; } }
+		public override int HashSize { get { return hashSize; } }
 
 		public const int BlockSizeInBytes = 32;
 
@@ -50,13 +77,13 @@ namespace Crypto
 
 		public CubeHash(int hashSize) // , int blockSize)
 		{
-			this.hashSize = hashSize / 8;
+			this.hashSize = hashSize;
 			// _blockSize = blockSize;
         }
 
 		private bool _isInitialized = false;
 
-		public virtual void Initialize()
+		public override void Initialize()
 		{
 			Clear();
 
@@ -69,11 +96,9 @@ namespace Crypto
 			_isInitialized = true;
 		}
 
-		public void Dispose() { Dispose(true); }
+		protected override void Dispose(bool disposing) { if (disposing) HashClear(); }
 
-		protected virtual void Dispose(bool disposing) { if (disposing) Clear(); }
-
-		public virtual void Clear()
+		public virtual void HashClear()
 		{
 			_isInitialized = false;
 
@@ -82,13 +107,18 @@ namespace Crypto
 			bufferFilled = 0;
 		}
 
+		protected override void HashCore(byte[] array, int start, int count)
+		{
+			Core(array, start, count);
+		}
+
 		public virtual void Core(byte[] array, int start, int count)
 		{
 			if (!_isInitialized) Initialize();
 
 			int bytesDone = 0, bytesToFill;
 			int blocksDone, blockBytesDone;
-			int i; // uint u;
+			// uint u;
 			do
 			{
 				bytesToFill = Math.Min(count, buffer.Length - bufferFilled);
@@ -107,7 +137,7 @@ namespace Crypto
 	crypto_uint32 u = *data;
 	u <<= 8 * ((state->pos / 8) % 4);
 	state->x[state->pos / 32] ^= u; /**/
-
+						
 						TransformBlock(buffer, blockBytesDone);
 					}
 					blockBytesDone = --blocksDone * BlockSizeInBytes;
@@ -116,16 +146,21 @@ namespace Crypto
 					if (bufferFilled > 0)
 					{
 						Buffer.BlockCopy(buffer, blockBytesDone, buffer, 0, bufferFilled);
-						for (i = bufferFilled; i < buffer.Length; ++i) buffer[i] = 0x00;
+						for (int i = bufferFilled; i < buffer.Length; ++i) buffer[i] = 0x00;
 					}
 				}
 
 			} while (bytesDone < count);
 		}
 
+		protected override byte[] HashFinal ()
+		{
+			return Final();
+		}
+
 		public virtual byte[] Final()
         {
-			var result = new byte[HashSize];
+			var result = new byte[(int)HashSize / 8];
 			Final(result);
 			return result;
 		}
@@ -138,7 +173,8 @@ namespace Crypto
 	u = (128 >> (state->pos % 8));
 	u <<= 8 * ((state->pos / 8) % 4);
 	state->x[state->pos / 32] ^= u; /**/
-
+			
+			buffer[bufferFilled++] = 0x80;
 			for (int i = bufferFilled; i < buffer.Length; ++i) buffer[i] = 0x00;
 			TransformBlock();
 
@@ -148,7 +184,7 @@ namespace Crypto
 			TransformBlock();
 
 			// if (BitConverter.IsLittleEndian)
-			Buffer.BlockCopy(state, 0, result, 0, HashSize);
+			Buffer.BlockCopy(state, 0, result, 0, (int)HashSize / 8);
 
 			_isInitialized = false;
 		}
@@ -167,7 +203,8 @@ namespace Crypto
 			return value;
 		}
 
-		static uint ROTATE(uint a, int b) { return ((a << b) | (a >> (32 - b))); }
+		// Beware. A ROTATE method would be nice, but this halfes the speed of CubeHash.
+		// static uint ROTATE(uint a, int b) { return ((a << b) | (a >> (32 - b))); }
 
 		protected virtual void TransformBlock()
 		{
@@ -178,7 +215,7 @@ namespace Crypto
         {
 			if (data != null)
 			{
-				for (int i = 0; i < (32 / 4); i++)
+				for (int i = 0; i < (BlockSizeInBytes / 4); i++)
 					state[i] ^= data[start + i];
 			}
 
@@ -215,22 +252,8 @@ namespace Crypto
 			uint state1E = state[30];
 			uint state1F = state[31];
 
-			uint y0;
-			uint y1;
-			uint y2;
-			uint y3;
-			uint y4;
-			uint y5;
-			uint y6;
-			uint y7;
-			uint y8;
-			uint y9;
-			uint yA;
-			uint yB;
-			uint yC;
-			uint yD;
-			uint yE;
-			uint yF;
+			uint y0, y1, y2, y3, y4, y5, y6, y7;
+			uint y8, y9, yA, yB, yC, yD, yE, yF;
 
             for (int r = 0; r < ROUNDS; ++r)
             {
@@ -268,22 +291,22 @@ namespace Crypto
                 y6 = state0E;
                 y7 = state0F;
 
-				state00 = ROTATE(y0, 7);
-				state01 = ROTATE(y1, 7);
-				state02 = ROTATE(y2, 7);
-				state03 = ROTATE(y3, 7);
-				state04 = ROTATE(y4, 7);
-				state05 = ROTATE(y5, 7);
-				state06 = ROTATE(y6, 7);
-				state07 = ROTATE(y7, 7);
-				state08 = ROTATE(y8, 7);
-				state09 = ROTATE(y9, 7);
-				state0A = ROTATE(yA, 7);
-				state0B = ROTATE(yB, 7);
-				state0C = ROTATE(yC, 7);
-				state0D = ROTATE(yD, 7);
-				state0E = ROTATE(yE, 7);
-				state0F = ROTATE(yF, 7);
+				state00 = ((y0 << 7) | (y0 >> (32 - 7))); // ROTATE(y0, 7);
+				state01 = ((y1 << 7) | (y1 >> (32 - 7))); // ROTATE(y1, 7);
+				state02 = ((y2 << 7) | (y2 >> (32 - 7))); // ROTATE(y2, 7);
+				state03 = ((y3 << 7) | (y3 >> (32 - 7))); // ROTATE(y3, 7);
+				state04 = ((y4 << 7) | (y4 >> (32 - 7))); // ROTATE(y4, 7);
+				state05 = ((y5 << 7) | (y5 >> (32 - 7))); // ROTATE(y5, 7);
+				state06 = ((y6 << 7) | (y6 >> (32 - 7))); // ROTATE(y6, 7);
+				state07 = ((y7 << 7) | (y7 >> (32 - 7))); // ROTATE(y7, 7);
+				state08 = ((y8 << 7) | (y8 >> (32 - 7))); // ROTATE(y8, 7);
+				state09 = ((y9 << 7) | (y9 >> (32 - 7))); // ROTATE(y9, 7);
+				state0A = ((yA << 7) | (yA >> (32 - 7))); // ROTATE(yA, 7);
+				state0B = ((yB << 7) | (yB >> (32 - 7))); // ROTATE(yB, 7);
+				state0C = ((yC << 7) | (yC >> (32 - 7))); // ROTATE(yC, 7);
+				state0D = ((yD << 7) | (yD >> (32 - 7))); // ROTATE(yD, 7);
+				state0E = ((yE << 7) | (yE >> (32 - 7))); // ROTATE(yE, 7);
+				state0F = ((yF << 7) | (yF >> (32 - 7))); // ROTATE(yF, 7);
 
                 state00 ^= state10;
                 state01 ^= state11;
@@ -370,22 +393,22 @@ namespace Crypto
                 yA = state0E;
                 yB = state0F;
 
-				state00 = ROTATE(y0, 11);
-				state01 = ROTATE(y1, 11);
-				state02 = ROTATE(y2, 11);
-				state03 = ROTATE(y3, 11);
-				state04 = ROTATE(y4, 11);
-				state05 = ROTATE(y5, 11);
-				state06 = ROTATE(y6, 11);
-				state07 = ROTATE(y7, 11);
-				state08 = ROTATE(y8, 11);
-				state09 = ROTATE(y9, 11);
-				state0A = ROTATE(yA, 11);
-				state0B = ROTATE(yB, 11);
-				state0C = ROTATE(yC, 11);
-				state0D = ROTATE(yD, 11);
-				state0E = ROTATE(yE, 11);
-				state0F = ROTATE(yF, 11);
+				state00 = ((y0 << 11) | (y0 >> (32 - 11))); // ROTATE(y0, 11);
+				state01 = ((y1 << 11) | (y1 >> (32 - 11))); // ROTATE(y1, 11);
+				state02 = ((y2 << 11) | (y2 >> (32 - 11))); // ROTATE(y2, 11);
+				state03 = ((y3 << 11) | (y3 >> (32 - 11))); // ROTATE(y3, 11);
+				state04 = ((y4 << 11) | (y4 >> (32 - 11))); // ROTATE(y4, 11);
+				state05 = ((y5 << 11) | (y5 >> (32 - 11))); // ROTATE(y5, 11);
+				state06 = ((y6 << 11) | (y6 >> (32 - 11))); // ROTATE(y6, 11);
+				state07 = ((y7 << 11) | (y7 >> (32 - 11))); // ROTATE(y7, 11);
+				state08 = ((y8 << 11) | (y8 >> (32 - 11))); // ROTATE(y8, 11);
+				state09 = ((y9 << 11) | (y9 >> (32 - 11))); // ROTATE(y9, 11);
+				state0A = ((yA << 11) | (yA >> (32 - 11))); // ROTATE(yA, 11);
+				state0B = ((yB << 11) | (yB >> (32 - 11))); // ROTATE(yB, 11);
+				state0C = ((yC << 11) | (yC >> (32 - 11))); // ROTATE(yC, 11);
+				state0D = ((yD << 11) | (yD >> (32 - 11))); // ROTATE(yD, 11);
+				state0E = ((yE << 11) | (yE >> (32 - 11))); // ROTATE(yE, 11);
+				state0F = ((yF << 11) | (yF >> (32 - 11))); // ROTATE(yF, 11);
 
                 state00 ^= state10;
                 state01 ^= state11;

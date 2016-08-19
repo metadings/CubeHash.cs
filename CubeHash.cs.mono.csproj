@@ -4,7 +4,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{8029A6D1-396A-4CD2-8666-9CB61B4D38E3}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>Crypto</RootNamespace>
     <AssemblyName>CubeHash</AssemblyName>
     <UseMSBuildEngine>False</UseMSBuildEngine>
@@ -32,5 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CubeHash.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Program.cs" />
   </ItemGroup>
 </Project>
