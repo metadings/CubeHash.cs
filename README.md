@@ -23,7 +23,7 @@ Ask questions on [stackoverflow](http://stackoverflow.com/questions/tagged/c%23+
 
 **Usage 1**
 
-Have "one" CubeHash hash value.
+Have "one" CubeHash value.
 
 ```csharp
 using Crypto;
@@ -44,7 +44,7 @@ using System.Text;
 
 **Usage 2**
 
-Have "many" CubeHash hash values.
+Have "many" CubeHash values.
 
 ```csharp
 using Crypto;
