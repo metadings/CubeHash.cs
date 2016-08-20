@@ -29,17 +29,17 @@ namespace Crypto
 		public static uint BytesToUInt32(byte[] buffer, int offset)
 		{
 			return
-				((uint)buffer[offset + 3] << 3 * 8) |
-				((uint)buffer[offset + 2] << 2 * 8) |
-				((uint)buffer[offset + 1] << 1 * 8) |
+				((uint)buffer[offset + 3] << 24) |
+				((uint)buffer[offset + 2] << 16) |
+				((uint)buffer[offset + 1] << 8) |
 				((uint)buffer[offset]);
 		}
 
 		public static void UInt32ToBytes(uint value, byte[] buffer, int offset)
 		{
-			buffer[offset + 3] = (byte)(value >> 3 * 8);
-			buffer[offset + 2] = (byte)(value >> 2 * 8);
-			buffer[offset + 1] = (byte)(value >> 1 * 8);
+			buffer[offset + 3] = (byte)(value >> 24);
+			buffer[offset + 2] = (byte)(value >> 16);
+			buffer[offset + 1] = (byte)(value >> 8);
 			buffer[offset] = (byte)value;
 		}
 
@@ -67,7 +67,7 @@ namespace Crypto
 			// _blockSize = blockSize;
 		}
 
-		private bool _isInitialized = false;
+		private bool isInitialized = false;
 
 		public override void Initialize()
 		{
@@ -79,14 +79,14 @@ namespace Crypto
 
 			TransformBlock();
 
-			_isInitialized = true;
+			isInitialized = true;
 		}
 
 		protected override void Dispose(bool disposing) { if (disposing) HashClear(); }
 
 		public virtual void HashClear()
 		{
-			_isInitialized = false;
+			isInitialized = false;
 
 			x00 = 0U; x01 = 0U; x02 = 0U; x03 = 0U;
 			x04 = 0U; x05 = 0U; x06 = 0U; x07 = 0U;
@@ -114,7 +114,7 @@ namespace Crypto
 
 		public virtual void Core(byte[] array, int start, int count)
 		{
-			if (!_isInitialized) Initialize();
+			if (!isInitialized) Initialize();
 
 			int bytesDone = 0, bytesToFill;
 			int blocksDone, blockBytesDone;
@@ -146,7 +146,7 @@ namespace Crypto
 					if (bufferFilled > 0)
 					{
 						Buffer.BlockCopy(buffer, blockBytesDone, buffer, 0, bufferFilled);
-						for (int i = bufferFilled; i < buffer.Length; ++i) buffer[i] = 0x00;
+						// for (int i = bufferFilled; i < buffer.Length; ++i) buffer[i] = 0x00;
 					}
 				}
 
@@ -167,7 +167,7 @@ namespace Crypto
 
 		public virtual void Final(byte[] result)
 		{
-			if (!_isInitialized) Initialize();
+			if (!isInitialized) Initialize();
 
 /*
 	u = (128 >> (state->pos % 8));
@@ -247,7 +247,7 @@ namespace Crypto
 				// default: throw new InvalidOperationException();
 			}
 
-			_isInitialized = false;
+			isInitialized = false;
 		}
 
 		public virtual void Compute(byte[] value, byte[] sourceCode)
@@ -296,39 +296,15 @@ namespace Crypto
 
 			for (int r = 0; r < ROUNDS; ++r)
 			{
-				x10 += x00;
-				x11 += x01;
-				x12 += x02;
-				x13 += x03;
-				x14 += x04;
-				x15 += x05;
-				x16 += x06;
-				x17 += x07;
-				x18 += x08;
-				x19 += x09;
-				x1A += x0A;
-				x1B += x0B;
-				x1C += x0C;
-				x1D += x0D;
-				x1E += x0E;
-				x1F += x0F;
+				x10 += x00; x11 += x01; x12 += x02; x13 += x03;
+				x14 += x04; x15 += x05; x16 += x06; x17 += x07;
+				x18 += x08; x19 += x09; x1A += x0A; x1B += x0B;
+				x1C += x0C; x1D += x0D; x1E += x0E; x1F += x0F;
 
-				y8 = x00;
-				y9 = x01;
-				yA = x02;
-				yB = x03;
-				yC = x04;
-				yD = x05;
-				yE = x06;
-				yF = x07;
-				y0 = x08;
-				y1 = x09;
-				y2 = x0A;
-				y3 = x0B;
-				y4 = x0C;
-				y5 = x0D;
-				y6 = x0E;
-				y7 = x0F;
+				y8 = x00; y9 = x01; yA = x02; yB = x03;
+				yC = x04; yD = x05; yE = x06; yF = x07;
+				y0 = x08; y1 = x09; y2 = x0A; y3 = x0B;
+				y4 = x0C; y5 = x0D; y6 = x0E; y7 = x0F;
 
 				x00 = ((y0 << 7) | (y0 >> (32 - 7))); // ROTATE(y0, 7);
 				x01 = ((y1 << 7) | (y1 >> (32 - 7))); // ROTATE(y1, 7);
@@ -347,90 +323,30 @@ namespace Crypto
 				x0E = ((yE << 7) | (yE >> (32 - 7))); // ROTATE(yE, 7);
 				x0F = ((yF << 7) | (yF >> (32 - 7))); // ROTATE(yF, 7);
 
-				x00 ^= x10;
-				x01 ^= x11;
-				x02 ^= x12;
-				x03 ^= x13;
-				x04 ^= x14;
-				x05 ^= x15;
-				x06 ^= x16;
-				x07 ^= x17;
-				x08 ^= x18;
-				x09 ^= x19;
-				x0A ^= x1A;
-				x0B ^= x1B;
-				x0C ^= x1C;
-				x0D ^= x1D;
-				x0E ^= x1E;
-				x0F ^= x1F;
+				x00 ^= x10; x01 ^= x11; x02 ^= x12; x03 ^= x13;
+				x04 ^= x14; x05 ^= x15; x06 ^= x16; x07 ^= x17;
+				x08 ^= x18; x09 ^= x19; x0A ^= x1A; x0B ^= x1B;
+				x0C ^= x1C; x0D ^= x1D; x0E ^= x1E; x0F ^= x1F;
 
-				y2 = x10;
-				y3 = x11;
-				y0 = x12;
-				y1 = x13;
-				y6 = x14;
-				y7 = x15;
-				y4 = x16;
-				y5 = x17;
-				yA = x18;
-				yB = x19;
-				y8 = x1A;
-				y9 = x1B;
-				yE = x1C;
-				yF = x1D;
-				yC = x1E;
-				yD = x1F;
+				y2 = x10; y3 = x11; y0 = x12; y1 = x13;
+				y6 = x14; y7 = x15; y4 = x16; y5 = x17;
+				yA = x18; yB = x19; y8 = x1A; y9 = x1B;
+				yE = x1C; yF = x1D; yC = x1E; yD = x1F;
 
-				x10 = y0;
-				x11 = y1;
-				x12 = y2;
-				x13 = y3;
-				x14 = y4;
-				x15 = y5;
-				x16 = y6;
-				x17 = y7;
-				x18 = y8;
-				x19 = y9;
-				x1A = yA;
-				x1B = yB;
-				x1C = yC;
-				x1D = yD;
-				x1E = yE;
-				x1F = yF;
+				x10 = y0; x11 = y1; x12 = y2; x13 = y3;
+				x14 = y4; x15 = y5; x16 = y6; x17 = y7;
+				x18 = y8; x19 = y9; x1A = yA; x1B = yB;
+				x1C = yC; x1D = yD; x1E = yE; x1F = yF;
 
-				x10 += x00;
-				x11 += x01;
-				x12 += x02;
-				x13 += x03;
-				x14 += x04;
-				x15 += x05;
-				x16 += x06;
-				x17 += x07;
-				x18 += x08;
-				x19 += x09;
-				x1A += x0A;
-				x1B += x0B;
-				x1C += x0C;
-				x1D += x0D;
-				x1E += x0E;
-				x1F += x0F;
+				x10 += x00; x11 += x01; x12 += x02; x13 += x03;
+				x14 += x04; x15 += x05; x16 += x06; x17 += x07;
+				x18 += x08; x19 += x09; x1A += x0A; x1B += x0B;
+				x1C += x0C; x1D += x0D; x1E += x0E; x1F += x0F;
 
-				y4 = x00;
-				y5 = x01;
-				y6 = x02;
-				y7 = x03;
-				y0 = x04;
-				y1 = x05;
-				y2 = x06;
-				y3 = x07;
-				yC = x08;
-				yD = x09;
-				yE = x0A;
-				yF = x0B;
-				y8 = x0C;
-				y9 = x0D;
-				yA = x0E;
-				yB = x0F;
+				y4 = x00; y5 = x01; y6 = x02; y7 = x03;
+				y0 = x04; y1 = x05; y2 = x06; y3 = x07;
+				yC = x08; yD = x09; yE = x0A; yF = x0B;
+				y8 = x0C; y9 = x0D; yA = x0E; yB = x0F;
 
 				x00 = ((y0 << 11) | (y0 >> (32 - 11))); // ROTATE(y0, 11);
 				x01 = ((y1 << 11) | (y1 >> (32 - 11))); // ROTATE(y1, 11);
@@ -449,56 +365,20 @@ namespace Crypto
 				x0E = ((yE << 11) | (yE >> (32 - 11))); // ROTATE(yE, 11);
 				x0F = ((yF << 11) | (yF >> (32 - 11))); // ROTATE(yF, 11);
 
-				x00 ^= x10;
-				x01 ^= x11;
-				x02 ^= x12;
-				x03 ^= x13;
-				x04 ^= x14;
-				x05 ^= x15;
-				x06 ^= x16;
-				x07 ^= x17;
-				x08 ^= x18;
-				x09 ^= x19;
-				x0A ^= x1A;
-				x0B ^= x1B;
-				x0C ^= x1C;
-				x0D ^= x1D;
-				x0E ^= x1E;
-				x0F ^= x1F;
+				x00 ^= x10; x01 ^= x11; x02 ^= x12; x03 ^= x13;
+				x04 ^= x14; x05 ^= x15; x06 ^= x16; x07 ^= x17;
+				x08 ^= x18; x09 ^= x19; x0A ^= x1A; x0B ^= x1B;
+				x0C ^= x1C; x0D ^= x1D; x0E ^= x1E; x0F ^= x1F;
 
-				y1 = x10;
-				y0 = x11;
-				y3 = x12;
-				y2 = x13;
-				y5 = x14;
-				y4 = x15;
-				y7 = x16;
-				y6 = x17;
-				y9 = x18;
-				y8 = x19;
-				yB = x1A;
-				yA = x1B;
-				yD = x1C;
-				yC = x1D;
-				yE = x1E;
-				yF = x1F;
+				y1 = x10; y0 = x11; y3 = x12; y2 = x13;
+				y5 = x14; y4 = x15; y7 = x16; y6 = x17;
+				y9 = x18; y8 = x19; yB = x1A; yA = x1B;
+				yD = x1C; yC = x1D; yE = x1E; yF = x1F;
 
-				x10 = y0;
-				x11 = y1;
-				x12 = y2;
-				x13 = y3;
-				x14 = y4;
-				x15 = y5;
-				x16 = y6;
-				x17 = y7;
-				x18 = y8;
-				x19 = y9;
-				x1A = yA;
-				x1B = yB;
-				x1C = yC;
-				x1D = yD;
-				x1E = yE;
-				x1F = yF;
+				x10 = y0; x11 = y1; x12 = y2; x13 = y3;
+				x14 = y4; x15 = y5; x16 = y6; x17 = y7;
+				x18 = y8; x19 = y9; x1A = yA; x1B = yB;
+				x1C = yC; x1D = yD; x1E = yE; x1F = yF;
 			}
 		}
 
