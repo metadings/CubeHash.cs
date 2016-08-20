@@ -55,7 +55,7 @@ namespace Crypto
 
 		private int bufferFilled;
 
-		// private readonly uint[] state = new uint[BlockSizeInBytes];
+		private readonly uint[] state = new uint[BlockSizeInBytes];
 
 		public CubeHash() : this(512) { }
 
@@ -73,9 +73,9 @@ namespace Crypto
 		{
 			HashClear();
 
-			x00 = (uint)HashSize / 8;
-			x01 = BlockSizeInBytes;
-			x02 = ROUNDS;
+			state[0] = (uint)HashSize / 8;
+			state[1] = BlockSizeInBytes;
+			state[2] = ROUNDS;
 
 			TransformBlock();
 
@@ -88,21 +88,7 @@ namespace Crypto
 		{
 			isInitialized = false;
 
-			x00 = 0U; x01 = 0U; x02 = 0U; x03 = 0U;
-			x04 = 0U; x05 = 0U; x06 = 0U; x07 = 0U;
-			x08 = 0U; x09 = 0U; x0A = 0U; x0B = 0U;
-			x0C = 0U; x0D = 0U; x0E = 0U; x0F = 0U;
-
-			x10 = 0U; x11 = 0U; x12 = 0U; x13 = 0U;
-			x14 = 0U; x15 = 0U; x16 = 0U; x17 = 0U;
-			x18 = 0U; x19 = 0U; x1A = 0U; x1B = 0U;
-			x1C = 0U; x1D = 0U; x1E = 0U; x1F = 0U;
-
-			y0 = 0U; y1 = 0U; y2 = 0U; y3 = 0U;
-			y4 = 0U; y5 = 0U; y6 = 0U; y7 = 0U;
-			y8 = 0U; y9 = 0U; yA = 0U; yB = 0U;
-			yC = 0U; yD = 0U; yE = 0U; yF = 0U;
-
+			for (int i = 0; i < state.Length; ++i) state[i] = 0U;
 			for (int i = 0; i < buffer.Length; ++i) buffer[i] = 0x00;
 			bufferFilled = 0;
 		}
@@ -131,16 +117,15 @@ namespace Crypto
 
 				if (bufferFilled >= BlockSizeInBytes)
 				{
-					for (blocksDone = 0; (blockBytesDone = blocksDone * BlockSizeInBytes) < bufferFilled; ++blocksDone)
+					for (blockBytesDone = 0, blocksDone = 0; blocksDone * BlockSizeInBytes < bufferFilled; ++blocksDone)
 					{
+						blockBytesDone = blocksDone * BlockSizeInBytes;
 /*
 	crypto_uint32 u = *data;
 	u <<= 8 * ((state->pos / 8) % 4);
 	state->x[state->pos / 32] ^= u; /**/
-
 						TransformBlock(buffer, blockBytesDone);
 					}
-					blockBytesDone = --blocksDone * BlockSizeInBytes;
 
 					bufferFilled -= blockBytesDone;
 					if (bufferFilled > 0)
@@ -178,74 +163,13 @@ namespace Crypto
 			for (int i = bufferFilled; i < BlockSizeInBytes; ++i) buffer[i] = 0x00;
 			TransformBlock(buffer, 0);
 
-			x1F ^= 1;
+			state[31] ^= 1U;
 
 			TransformBlock();
 			TransformBlock();
 
 			// if (BitConverter.IsLittleEndian)
-
-			// for (int i = 0; i < (HashSize / 8); ++i) result[i] = 0x00;
-
-			switch (HashSize)
-			{
-				case 224:
-					UInt32ToBytes(x00, result, 0);
-					UInt32ToBytes(x01, result, 4);
-					UInt32ToBytes(x02, result, 8);
-					UInt32ToBytes(x03, result, 12);
-					UInt32ToBytes(x04, result, 16);
-					UInt32ToBytes(x05, result, 20);
-					UInt32ToBytes(x06, result, 24);
-					break;
-
-				case 256:
-					UInt32ToBytes(x00, result, 0);
-					UInt32ToBytes(x01, result, 4);
-					UInt32ToBytes(x02, result, 8);
-					UInt32ToBytes(x03, result, 12);
-					UInt32ToBytes(x04, result, 16);
-					UInt32ToBytes(x05, result, 20);
-					UInt32ToBytes(x06, result, 24);
-					UInt32ToBytes(x07, result, 28);
-					break;
-
-				case 384:
-					UInt32ToBytes(x00, result, 0);
-					UInt32ToBytes(x01, result, 4);
-					UInt32ToBytes(x02, result, 8);
-					UInt32ToBytes(x03, result, 12);
-					UInt32ToBytes(x04, result, 16);
-					UInt32ToBytes(x05, result, 20);
-					UInt32ToBytes(x06, result, 24);
-					UInt32ToBytes(x07, result, 28);
-					UInt32ToBytes(x08, result, 32);
-					UInt32ToBytes(x09, result, 36);
-					UInt32ToBytes(x0A, result, 40);
-					UInt32ToBytes(x0B, result, 44);
-					break;
-
-				case 512:
-					UInt32ToBytes(x00, result, 0);
-					UInt32ToBytes(x01, result, 4);
-					UInt32ToBytes(x02, result, 8);
-					UInt32ToBytes(x03, result, 12);
-					UInt32ToBytes(x04, result, 16);
-					UInt32ToBytes(x05, result, 20);
-					UInt32ToBytes(x06, result, 24);
-					UInt32ToBytes(x07, result, 28);
-					UInt32ToBytes(x08, result, 32);
-					UInt32ToBytes(x09, result, 36);
-					UInt32ToBytes(x0A, result, 40);
-					UInt32ToBytes(x0B, result, 44);
-					UInt32ToBytes(x0C, result, 48);
-					UInt32ToBytes(x0D, result, 52);
-					UInt32ToBytes(x0E, result, 56);
-					UInt32ToBytes(x0F, result, 60);
-					break;
-
-				// default: throw new InvalidOperationException();
-			}
+			Buffer.BlockCopy(state, 0, result, 0, HashSize / 8);
 
 			isInitialized = false;
 		}
@@ -272,27 +196,25 @@ namespace Crypto
 			TransformBlock(null, 0);
 		}
 
-		uint x00, x01, x02, x03, x04, x05, x06, x07;
-		uint x08, x09, x0A, x0B, x0C, x0D, x0E, x0F;
-		uint x10, x11, x12, x13, x14, x15, x16, x17;
-		uint x18, x19, x1A, x1B, x1C, x1D, x1E, x1F;
-
-		uint y0, y1, y2, y3, y4, y5, y6, y7;
-		uint y8, y9, yA, yB, yC, yD, yE, yF;
-
 		protected virtual void TransformBlock(byte[] data, int start)
 		{
 			if (data != null)
 			{
-				x00 ^= BytesToUInt32(data, start);
-				x01 ^= BytesToUInt32(data, start + 4);
-				x02 ^= BytesToUInt32(data, start + 8);
-				x03 ^= BytesToUInt32(data, start + 12);
-				x04 ^= BytesToUInt32(data, start + 16);
-				x05 ^= BytesToUInt32(data, start + 20);
-				x06 ^= BytesToUInt32(data, start + 24);
-				x07 ^= BytesToUInt32(data, start + 28);
+				for (int i = 0; i < (BlockSizeInBytes / 4); i++)
+					state[i] ^= data[start + i];
 			}
+
+			uint x00 = state[0], x01 = state[1], x02 = state[2], x03 = state[3];
+			uint x04 = state[4], x05 = state[5], x06 = state[6], x07 = state[7];
+			uint x08 = state[8], x09 = state[9], x0A = state[10], x0B = state[11];
+			uint x0C = state[12], x0D = state[13], x0E = state[14], x0F = state[15];
+			uint x10 = state[16], x11 = state[17], x12 = state[18], x13 = state[19];
+			uint x14 = state[20], x15 = state[21], x16 = state[22], x17 = state[23];
+			uint x18 = state[24], x19 = state[25], x1A = state[26], x1B = state[27];
+			uint x1C = state[28], x1D = state[29], x1E = state[30], x1F = state[31];
+
+			uint y0, y1, y2, y3, y4, y5, y6, y7;
+			uint y8, y9, yA, yB, yC, yD, yE, yF;
 
 			for (int r = 0; r < ROUNDS; ++r)
 			{
@@ -380,6 +302,15 @@ namespace Crypto
 				x18 = y8; x19 = y9; x1A = yA; x1B = yB;
 				x1C = yC; x1D = yD; x1E = yE; x1F = yF;
 			}
+
+			state[0] = x00; state[1] = x01; state[2] = x02; state[3] = x03;
+			state[4] = x04; state[5] = x05; state[6] = x06; state[7] = x07;
+			state[8] = x08; state[9] = x09; state[10] = x0A; state[11] = x0B;
+			state[12] = x0C; state[13] = x0D; state[14] = x0E; state[15] = x0F;
+			state[16] = x10; state[17] = x11; state[18] = x12; state[19] = x13;
+			state[20] = x14; state[21] = x15; state[22] = x16; state[23] = x17;
+			state[24] = x18; state[25] = x19; state[26] = x1A; state[27] = x1B;
+			state[28] = x1C; state[29] = x1D; state[30] = x1E; state[31] = x1F;
 		}
 
 	}
