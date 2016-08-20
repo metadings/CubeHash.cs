@@ -169,7 +169,9 @@ namespace Crypto
 			TransformBlock();
 
 			// if (BitConverter.IsLittleEndian)
-			Buffer.BlockCopy(state, 0, result, 0, HashSize / 8);
+			// Buffer.BlockCopy(state, 0, result, 0, HashSize / 8);
+			for (int i = 0; i < (HashSize / 8) / 4; ++i)
+				UInt32ToBytes(state[i], result, i << 2);
 
 			isInitialized = false;
 		}
