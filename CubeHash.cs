@@ -201,7 +201,7 @@ namespace Crypto
 			if (data != null)
 			{
 				for (int i = 0; i < (BlockSizeInBytes / 4); i++)
-					state[i] ^= data[start + i];
+					state[i] ^= BytesToUInt32(data, start + (i << 2));
 			}
 
 			uint x00 = state[0], x01 = state[1], x02 = state[2], x03 = state[3];
