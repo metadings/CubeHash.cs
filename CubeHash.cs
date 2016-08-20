@@ -117,7 +117,7 @@ namespace Crypto
 
 				if (bufferFilled >= BlockSizeInBytes)
 				{
-					for (blockBytesDone = 0, blocksDone = 0; blocksDone * BlockSizeInBytes < bufferFilled; ++blocksDone)
+					for (blockBytesDone = 0, blocksDone = 0; (blocksDone + 1) * BlockSizeInBytes < bufferFilled; ++blocksDone)
 					{
 						blockBytesDone = blocksDone * BlockSizeInBytes;
 /*
