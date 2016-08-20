@@ -103,7 +103,7 @@ namespace Crypto
 			if (!isInitialized) Initialize();
 
 			int bytesDone = 0, bytesToFill;
-			int blocksDone, blockBytesDone;
+			int blockBytesDone;
 			// uint u;
 			do
 			{
@@ -115,24 +115,22 @@ namespace Crypto
 				count -= bytesToFill;
 				start += bytesToFill;
 
-				if (bufferFilled >= BlockSizeInBytes)
+				for (blockBytesDone = 0; blockBytesDone + BlockSizeInBytes <= bufferFilled; )
 				{
-					for (blockBytesDone = 0, blocksDone = 0; (blocksDone + 1) * BlockSizeInBytes <= bufferFilled; ++blocksDone)
-					{
-						blockBytesDone = blocksDone * BlockSizeInBytes;
 /*
 	crypto_uint32 u = *data;
 	u <<= 8 * ((state->pos / 8) % 4);
 	state->x[state->pos / 32] ^= u; /**/
-						TransformBlock(buffer, blockBytesDone);
-					}
+					TransformBlock(buffer, blockBytesDone);
 
-					bufferFilled -= blockBytesDone;
-					if (bufferFilled > 0)
-					{
-						Buffer.BlockCopy(buffer, blockBytesDone, buffer, 0, bufferFilled);
-						// for (int i = bufferFilled; i < buffer.Length; ++i) buffer[i] = 0x00;
-					}
+					blockBytesDone += BlockSizeInBytes;
+				}
+
+				bufferFilled -= blockBytesDone;
+				if (bufferFilled > 0)
+				{
+					Buffer.BlockCopy(buffer, blockBytesDone, buffer, 0, bufferFilled);
+					// for (int i = bufferFilled; i < buffer.Length; ++i) buffer[i] = 0x00;
 				}
 
 			} while (count > 0);

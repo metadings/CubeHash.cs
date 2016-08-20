@@ -71,8 +71,8 @@ using System.Text;
 		/* DANGER: Your program will run FOR HOURS !
 
 		   Intel Pentium Dual CPU E2160 @ 1.80GHz x2
-		   => 100.000.000 CubeHash512 in 954s or 15,9m
-		   => 104.821 CubeHash512/s or 6.289.308 CubeHash512/m
+		   => 100.000.000 CubeHash512 in 811s or 13,5m
+		   => 123.305 CubeHash512/s or 7.398.273 CubeHash512/m
 
 		1. Run this using a pipe, on GNU/Linux and on Windows
 
