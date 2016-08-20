@@ -135,7 +135,7 @@ namespace Crypto
 					}
 				}
 
-			} while (bytesDone < count);
+			} while (count > 0);
 		}
 
 		protected override byte[] HashFinal ()
