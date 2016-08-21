@@ -51,7 +51,7 @@ namespace Crypto
 
 		public const int ROUNDS = 16;
 
-		private readonly byte[] buffer = new byte[512];
+		private readonly byte[] buffer;
 
 		private int bufferFilled;
 
@@ -65,6 +65,8 @@ namespace Crypto
 		{
 			this.hashSize = hashSize;
 			// _blockSize = blockSize;
+
+			buffer = new byte[HashSize / 8];
 		}
 
 		private bool isInitialized = false;
@@ -103,37 +105,26 @@ namespace Crypto
 			if (!isInitialized) Initialize();
 
 			int bytesDone = 0, bytesToFill;
-			int blockBytesDone;
-			// uint u;
+			int offset = start;
 			do
 			{
-				bytesToFill = Math.Min(count, buffer.Length - bufferFilled);
-				Buffer.BlockCopy(array, start, buffer, bufferFilled, bytesToFill);
+				bytesToFill = Math.Min(count - offset, BlockSizeInBytes);
+				Buffer.BlockCopy(array, offset, buffer, bufferFilled, bytesToFill);
 
 				bytesDone += bytesToFill;
 				bufferFilled += bytesToFill;
-				count -= bytesToFill;
-				start += bytesToFill;
+				offset += bytesToFill;
 
-				for (blockBytesDone = 0; blockBytesDone + BlockSizeInBytes <= bufferFilled; )
+				if (bufferFilled == BlockSizeInBytes)
 				{
-/*
-	crypto_uint32 u = *data;
-	u <<= 8 * ((state->pos / 8) % 4);
-	state->x[state->pos / 32] ^= u; /**/
-					TransformBlock(buffer, blockBytesDone);
-
-					blockBytesDone += BlockSizeInBytes;
+					uint u = BytesToUInt32(buffer, 0);
+					u <<= 8 * ((bufferFilled / 8) % 4);
+					state[bufferFilled / 32] ^= u;
+					TransformBlock(buffer, 0);
+					bufferFilled = 0;
 				}
 
-				bufferFilled -= blockBytesDone;
-				if (bufferFilled > 0)
-				{
-					Buffer.BlockCopy(buffer, blockBytesDone, buffer, 0, bufferFilled);
-					// for (int i = bufferFilled; i < buffer.Length; ++i) buffer[i] = 0x00;
-				}
-
-			} while (count > 0);
+			} while (bytesDone < count && offset < array.Length);
 		}
 
 		protected override byte[] HashFinal ()
@@ -152,22 +143,18 @@ namespace Crypto
 		{
 			if (!isInitialized) Initialize();
 
-/*
-	u = (128 >> (state->pos % 8));
-	u <<= 8 * ((state->pos / 8) % 4);
-	state->x[state->pos / 32] ^= u; /**/
-
-			buffer[bufferFilled++] = 0x80;
 			for (int i = bufferFilled; i < BlockSizeInBytes; ++i) buffer[i] = 0x00;
+
+			uint u = (uint)(128 >> (bufferFilled % 8));
+			u <<= 8 * ((bufferFilled / 8) % 4);
+			state[bufferFilled / 32] ^= u;
 			TransformBlock(buffer, 0);
 
 			state[31] ^= 1U;
-
 			TransformBlock();
 			TransformBlock();
 
 			// if (BitConverter.IsLittleEndian)
-			// Buffer.BlockCopy(state, 0, result, 0, HashSize / 8);
 			for (int i = 0; i < (HashSize / 8) / 4; ++i) UInt32ToBytes(state[i], result, i << 2);
 
 			isInitialized = false;
