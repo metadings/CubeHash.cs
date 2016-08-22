@@ -60,19 +60,22 @@ namespace Crypto
 			// using (var fileOut = new FileStream(outFile.FullName))
 			using (var hash = new CubeHash512())
 			{
-				var buffer = new byte[256];
-				int bufferC = 0;
-				int bufferL;
+				var buffer = new byte[128];
+				int bufferL, fileI = 0;
+				long fileL = inFile.Length;
 				do
 				{
-					bufferL = fileIn.Read(buffer, bufferC, bufferC + buffer.Length);
-				
+					bufferL = fileIn.Read(buffer, 0, buffer.Length);
+
 					if (bufferL > 0)
 					{
 						hash.Core(buffer, 0, bufferL);
 					}
-				
-				} while(bufferL == 0 || (bufferC += buffer.Length) < fileIn.Length);
+
+					fileL -= bufferL;
+					fileI += bufferL;
+
+				} while(0 < fileL);
 
 				hashValue = hash.Final();
 			}
