@@ -92,7 +92,7 @@ namespace Crypto
 
 		// public void Dispose() { Dispose(true); }
 
-		protected override void Dispose(bool disposing) { if (disposing) HashClear(); base.Dispose(); }
+		protected override void Dispose(bool disposing) { if (disposing) HashClear(); /* base.Dispose(); */ }
 
 		public virtual void HashClear()
 		{
@@ -121,17 +121,16 @@ namespace Crypto
 			
 			if (!isInitialized) Initialize();
 
-			int bytesDone = 0, bytesToFill;
-			int offset = start, bufferOffset;
+			int bytesToFill, offset = start, bufferOffset = 0;
 			uint u;
 			do
 			{
-				bytesToFill = Math.Min(count - offset, BufferSizeInBytes - bufferFilled);
+				bytesToFill = Math.Min(count, BufferSizeInBytes - bufferFilled);
 				Buffer.BlockCopy(array, offset, buffer, bufferFilled, bytesToFill);
 
-				bytesDone += bytesToFill;
 				bufferFilled += bytesToFill;
 				offset += bytesToFill;
+				count -= bytesToFill;
 
 				bufferOffset = 0;
 				while (bufferFilled >= BlockSizeInBytes)
@@ -141,8 +140,6 @@ namespace Crypto
 					state[BlockSizeInBytes / 32] ^= u;
 					TransformBlock(buffer, bufferOffset);
 
-					start += BlockSizeInBytes;
-					count -= BlockSizeInBytes;
 					bufferFilled -= BlockSizeInBytes;
 					bufferOffset += BlockSizeInBytes;
 				}
@@ -151,7 +148,7 @@ namespace Crypto
 					Buffer.BlockCopy(buffer, bufferOffset, buffer, 0, bufferFilled);
 				}
 
-			} while (bytesDone < count && offset < array.Length);
+			} while (0 < count && offset < array.Length);
 		}
 
 		protected override byte[] HashFinal ()
