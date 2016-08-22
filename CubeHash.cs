@@ -210,6 +210,27 @@ namespace Crypto
 			return value;
 		}
 
+		public override byte[] Hash
+		{
+			get {
+				// if (m_bDisposed) throw new ObjectDisposedException(null);
+				// if (State != 0) throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("Cryptography_HashNotYetFinalized"));
+
+				// Output
+				var hash = new byte[HashSizeInBytes];
+				if (BitConverter.IsLittleEndian)
+				{
+					Buffer.BlockCopy(state, 0, hash, 0, HashSizeInBytes);
+				}
+				else
+				{
+					for (int i = 0; i < HashSizeInUInt32; ++i)
+						UInt32ToBytes(state[i], hash, i << 2);
+				}
+				return hash;
+			}
+		}
+
 		// Beware. A ROTATE method would be nice, but this halfes the speed of CubeHash.cs
 		// static uint ROTATE(uint a, int b) { return ((a << b) | (a >> (32 - b))); }
 
