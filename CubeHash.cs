@@ -166,8 +166,8 @@ namespace Crypto
 		public virtual void Final(byte[] hash)
 		{
 			if (hash.Length != HashSizeInBytes)
-				throw new ArgumentOutOfRangeException("result", 
-					string.Format("result.Length must be {0} HashSizeInBytes",
+				throw new ArgumentOutOfRangeException("hash", 
+					string.Format("hash.Length must be {0} HashSizeInBytes",
 						HashSizeInBytes));
 			
 			if (!isInitialized) Initialize();
