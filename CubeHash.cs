@@ -47,17 +47,23 @@ namespace Crypto
 
 		public override int HashSize { get { return hashSize; } }
 
+		public int HashSizeInBytes { get { return hashSize / 8; } }
+
+		public int HashSizeInUInt32 { get { return HashSizeInBytes / 4; } }
+
 		public const int BlockSizeInBytes = 32;
+
+		public const int BlockSizeInUInt32 = 8;
 
 		public const int BufferSizeInBytes = BlockSizeInBytes * 16;
 
-		public const int ROUNDS = 16;
-
-		private readonly byte[] buffer;
+		private readonly byte[] buffer = new byte[BufferSizeInBytes];
 
 		private int bufferFilled;
 
 		private readonly uint[] state = new uint[BlockSizeInBytes];
+
+		public const int ROUNDS = 16;
 
 		public CubeHash() : this(512) { }
 
@@ -67,8 +73,6 @@ namespace Crypto
 		{
 			this.hashSize = hashSize;
 			// _blockSize = blockSize;
-
-			buffer = new byte[HashSize / 8];
 		}
 
 		private bool isInitialized = false;
@@ -77,7 +81,7 @@ namespace Crypto
 		{
 			HashClear();
 
-			state[0] = (uint)HashSize / 8;
+			state[0] = (uint)HashSizeInBytes;
 			state[1] = BlockSizeInBytes;
 			state[2] = ROUNDS;
 
@@ -86,7 +90,9 @@ namespace Crypto
 			isInitialized = true;
 		}
 
-		protected override void Dispose(bool disposing) { if (disposing) HashClear(); }
+		// public void Dispose() { Dispose(true); }
+
+		protected override void Dispose(bool disposing) { if (disposing) HashClear(); base.Dispose(); }
 
 		public virtual void HashClear()
 		{
@@ -104,6 +110,15 @@ namespace Crypto
 
 		public virtual void Core(byte[] array, int start, int count)
 		{
+			if (array == null)
+				throw new ArgumentNullException("array");
+			if (start < 0)
+				throw new ArgumentOutOfRangeException("start");
+			if (count < 0)
+				throw new ArgumentOutOfRangeException("count");
+			if (start + count > array.Length)
+				throw new ArgumentOutOfRangeException("start + count");
+			
 			if (!isInitialized) Initialize();
 
 			int bytesDone = 0, bytesToFill;
@@ -146,13 +161,18 @@ namespace Crypto
 
 		public virtual byte[] Final()
 		{
-			var result = new byte[HashSize / 8];
-			Final(result);
-			return result;
+			var hash = new byte[HashSizeInBytes];
+			Final(hash);
+			return hash;
 		}
 
-		public virtual void Final(byte[] result)
+		public virtual void Final(byte[] hash)
 		{
+			if (hash.Length != HashSizeInBytes)
+				throw new ArgumentOutOfRangeException("result", 
+					string.Format("result.Length must be {0} HashSizeInBytes",
+						HashSizeInBytes));
+			
 			if (!isInitialized) Initialize();
 
 			for (int i = bufferFilled; i < BlockSizeInBytes; ++i) buffer[i] = 0x00;
@@ -167,7 +187,7 @@ namespace Crypto
 			TransformBlock();
 
 			// if (BitConverter.IsLittleEndian)
-			for (int i = 0; i < (HashSize / 8) / 4; ++i) UInt32ToBytes(state[i], result, i << 2);
+			for (int i = 0; i < HashSizeInUInt32; ++i) UInt32ToBytes(state[i], hash, i << 2);
 
 			isInitialized = false;
 		}
@@ -180,13 +200,13 @@ namespace Crypto
 
 		public virtual byte[] Compute(byte[] sourceCode)
 		{
-			var value = new byte[HashSize];
+			var value = new byte[HashSizeInBytes];
 			Core(sourceCode, 0, sourceCode.Length);
 			Final(value);
 			return value;
 		}
 
-		// Beware. A ROTATE method would be nice, but this halfes the speed of CubeHash.
+		// Beware. A ROTATE method would be nice, but this halfes the speed of CubeHash.cs
 		// static uint ROTATE(uint a, int b) { return ((a << b) | (a >> (32 - b))); }
 
 		protected virtual void TransformBlock()
@@ -198,7 +218,7 @@ namespace Crypto
 		{
 			if (data != null)
 			{
-				for (int i = 0; i < (BlockSizeInBytes / 4); i++)
+				for (int i = 0; i < BlockSizeInUInt32; i++)
 					state[i] ^= BytesToUInt32(data, start + (i << 2));
 			}
 
