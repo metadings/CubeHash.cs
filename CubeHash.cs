@@ -49,6 +49,8 @@ namespace Crypto
 
 		public const int BlockSizeInBytes = 32;
 
+		public const int BufferSizeInBytes = BlockSizeInBytes * 16;
+
 		public const int ROUNDS = 16;
 
 		private readonly byte[] buffer;
@@ -105,23 +107,33 @@ namespace Crypto
 			if (!isInitialized) Initialize();
 
 			int bytesDone = 0, bytesToFill;
-			int offset = start;
+			int offset = start, bufferOffset;
+			uint u;
 			do
 			{
-				bytesToFill = Math.Min(count - offset, BlockSizeInBytes);
+				bytesToFill = Math.Min(count - offset, BufferSizeInBytes - bufferFilled);
 				Buffer.BlockCopy(array, offset, buffer, bufferFilled, bytesToFill);
 
 				bytesDone += bytesToFill;
 				bufferFilled += bytesToFill;
 				offset += bytesToFill;
 
-				if (bufferFilled == BlockSizeInBytes)
+				bufferOffset = 0;
+				while (bufferFilled >= BlockSizeInBytes)
 				{
-					uint u = BytesToUInt32(buffer, 0);
-					u <<= 8 * ((bufferFilled / 8) % 4);
-					state[bufferFilled / 32] ^= u;
-					TransformBlock(buffer, 0);
-					bufferFilled = 0;
+					u = BytesToUInt32(buffer, bufferOffset);
+					u <<= 8 * ((BlockSizeInBytes / 8) % 4);
+					state[BlockSizeInBytes / 32] ^= u;
+					TransformBlock(buffer, bufferOffset);
+
+					start += BlockSizeInBytes;
+					count -= BlockSizeInBytes;
+					bufferFilled -= BlockSizeInBytes;
+					bufferOffset += BlockSizeInBytes;
+				}
+				if (bufferFilled > 0)
+				{
+					Buffer.BlockCopy(buffer, bufferOffset, buffer, 0, bufferFilled);
 				}
 
 			} while (bytesDone < count && offset < array.Length);
