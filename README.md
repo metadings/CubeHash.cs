@@ -56,7 +56,7 @@ using System.Text;
 
 	UInt32 i = 0; // threadI;
 
-	using (var hash = new CubeHash())
+	using (var hash = new CubeHash512())
 	{
 		do
 		{
