@@ -109,6 +109,6 @@ using System.Text;
 0000020
 
 ~/CubeHash.cs/bin/Debug $ mono ./CubeHash.exe --in=./Hallo.txt
-bb347e2136512125f12fa3ddea441916432496fd59bdf9f94ce4384aa7620cb9271fe52788d81995f5ade86dbcd6a0ed4a3fff5649df51402d3a89a28d245b77
+d639ca075ead8012be6ce25f8de10f51081ec20f8626f60c2ffebcf74a179af1731ac3e2cddbe742cfc9049b116cb4c4e3d318317e47d01d27e2de7c1f5b56da
 ```
 

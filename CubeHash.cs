@@ -183,8 +183,15 @@ namespace Crypto
 			TransformBlock();
 			TransformBlock();
 
-			// if (BitConverter.IsLittleEndian)
-			for (int i = 0; i < HashSizeInUInt32; ++i) UInt32ToBytes(state[i], hash, i << 2);
+			if (BitConverter.IsLittleEndian)
+			{
+				Buffer.BlockCopy(state, 0, hash, 0, HashSizeInBytes);
+			}
+			else
+			{
+				for (int i = 0; i < HashSizeInUInt32; ++i)
+					UInt32ToBytes(state[i], hash, i << 2);
+			}
 
 			isInitialized = false;
 		}
@@ -215,8 +222,15 @@ namespace Crypto
 		{
 			if (data != null)
 			{
-				for (int i = 0; i < BlockSizeInUInt32; i++)
-					state[i] ^= BytesToUInt32(data, start + (i << 2));
+				if (BitConverter.IsLittleEndian)
+				{
+					Buffer.BlockCopy(data, start, state, 0, BlockSizeInBytes);
+				}
+				else
+				{
+					for (int i = 0; i < BlockSizeInUInt32; i++)
+						state[i] ^= BytesToUInt32(data, start + (i << 2));
+				}
 			}
 
 			uint x00 = state[0], x01 = state[1], x02 = state[2], x03 = state[3];
