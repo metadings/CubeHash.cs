@@ -92,7 +92,7 @@ namespace Crypto
 
 		// public void Dispose() { Dispose(true); }
 
-		protected override void Dispose(bool disposing) { if (disposing) HashClear(); /* base.Dispose(); */ }
+		protected override void Dispose(bool disposing) { if (disposing) HashClear(); base.Dispose(disposing); }
 
 		public virtual void HashClear()
 		{
