@@ -68,11 +68,14 @@ using System.Text;
 
 		} while (0 < ++i);
 
-		/* DANGER: Your program will run FOR HOURS !
+		/* Beware. Your program will run FOR HOURS !
 
+		   2016-08-21 13.46.00
 		   Intel Pentium Dual CPU E2160 @ 1.80GHz x2
-		   => 100.000.000 CubeHash512 in 811s or 13,5m
-		   => 123.305 CubeHash512/s or 7.398.273 CubeHash512/m
+
+		     100.000.000 CubeHash512 in 14min 08sec
+		   ==  100000000 ÷ (14×60 + 08)
+		   :=    117.925 CubeHash512/s
 
 		1. Run this using a pipe, on GNU/Linux and on Windows
 
@@ -82,6 +85,7 @@ using System.Text;
 
 		   Press `M-x auto-revert-mode`
 		   or use file `~/.emacs.d/init.el` with `(global-auto-revert-mode 1)`,
+
 		   to have a real-time view of your program.
 
 		3. Also try this using new System.Threading.Thread's:
