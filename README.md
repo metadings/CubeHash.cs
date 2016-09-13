@@ -6,10 +6,10 @@
 Uli Riehm <metadings@live.de>
 Public Domain
 
-Based on supercop-20141124/crypto_hash/cubehash512/unrolled
-     and supercop-20141124/crypto_hash/cubehash512/unrolled3
+Based on supercop-20141124/crypto_hash/cubehash512/simple
+     and supercop-20141124/crypto_hash/cubehash512/unrolled2
 
-20100623, 20100917
+20081110, 20100726
 D. J. Bernstein
 Public domain.
 ```
@@ -109,6 +109,6 @@ using System.Text;
 0000020
 
 ~/CubeHash.cs/bin/Debug $ mono ./CubeHash.exe --in=./Hallo.txt
-d639ca075ead8012be6ce25f8de10f51081ec20f8626f60c2ffebcf74a179af1731ac3e2cddbe742cfc9049b116cb4c4e3d318317e47d01d27e2de7c1f5b56da
+8e335ae82903d3d6557d60e6a7f231e54443f2ad2226e5c1f2db8f8d0112ada28637d9be275171a47e80b22f8aea716e97850083a9d27f361026501f2251e05b
 ```
 
