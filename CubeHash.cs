@@ -4,10 +4,10 @@
 	Uli Riehm <metadings@live.de>
 	Public Domain
 
-	Based on supercop-20141124/crypto_hash/cubehash512/unrolled
-	     and supercop-20141124/crypto_hash/cubehash512/unrolled3
+	Based on supercop-20141124/crypto_hash/cubehash512/simple
+	     and supercop-20141124/crypto_hash/cubehash512/unrolled2
 
-	20100623, 20100917
+	20081110, 20100726
 	D. J. Bernstein
 	Public domain.
 */
@@ -40,7 +40,7 @@ namespace Crypto
 
 		private int pos;
 
-		private readonly uint[] state = new uint[BlockSizeInBytes];
+		private readonly uint[] state = new uint[32];
 
 		public const int ROUNDS = 16;
 
@@ -114,7 +114,7 @@ namespace Crypto
 			}
 		}
 
-		protected override byte[] HashFinal ()
+		protected override byte[] HashFinal()
 		{
 			return Final();
 		}
