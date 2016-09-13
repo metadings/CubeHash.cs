@@ -26,23 +26,6 @@ namespace Crypto
 
 	public class CubeHash : HashAlgorithm // IDisposable
 	{
-		public static uint BytesToUInt32(byte[] buffer, int offset)
-		{
-			return
-				((uint)buffer[offset + 3] << 24) |
-				((uint)buffer[offset + 2] << 16) |
-				((uint)buffer[offset + 1] << 8) |
-				((uint)buffer[offset]);
-		}
-
-		public static void UInt32ToBytes(uint value, byte[] buffer, int offset)
-		{
-			buffer[offset + 3] = (byte)(value >> 24);
-			buffer[offset + 2] = (byte)(value >> 16);
-			buffer[offset + 1] = (byte)(value >> 8);
-			buffer[offset] = (byte)value;
-		}
-
 		private readonly int hashSize;
 
 		public override int HashSize { get { return hashSize; } }
@@ -53,13 +36,9 @@ namespace Crypto
 
 		public const int BlockSizeInBytes = 32;
 
-		public const int BlockSizeInUInt32 = 8;
+		public const int BlockSizeInUInt32 = BlockSizeInBytes / 4;
 
-		public const int BufferSizeInBytes = BlockSizeInBytes * 16;
-
-		private readonly byte[] buffer = new byte[BufferSizeInBytes];
-
-		private int bufferFilled;
+		private int pos;
 
 		private readonly uint[] state = new uint[BlockSizeInBytes];
 
@@ -67,12 +46,9 @@ namespace Crypto
 
 		public CubeHash() : this(512) { }
 
-		// public CubeHash(int hashSize) : this (hashSize, 256) { }
-
-		public CubeHash(int hashSize) // , int blockSize)
+		public CubeHash(int hashSize)
 		{
 			this.hashSize = hashSize;
-			// _blockSize = blockSize;
 		}
 
 		private bool isInitialized = false;
@@ -81,13 +57,12 @@ namespace Crypto
 		{
 			HashClear();
 
+			isInitialized = true;
+
 			state[0] = (uint)HashSizeInBytes;
 			state[1] = BlockSizeInBytes;
 			state[2] = ROUNDS;
-
 			TransformBlock();
-
-			isInitialized = true;
 		}
 
 		// public void Dispose() { Dispose(true); }
@@ -98,9 +73,8 @@ namespace Crypto
 		{
 			isInitialized = false;
 
+			pos = 0;
 			for (int i = 0; i < state.Length; ++i) state[i] = 0U;
-			for (int i = 0; i < buffer.Length; ++i) buffer[i] = 0x00;
-			bufferFilled = 0;
 		}
 
 		protected override void HashCore(byte[] array, int start, int count)
@@ -121,34 +95,23 @@ namespace Crypto
 			
 			if (!isInitialized) Initialize();
 
-			int bytesToFill, offset = start, bufferOffset = 0;
 			uint u;
-			do
+			while (0 < count)
 			{
-				bytesToFill = Math.Min(count, BufferSizeInBytes - bufferFilled);
-				Buffer.BlockCopy(array, offset, buffer, bufferFilled, bytesToFill);
+				u = (uint)array[start];
+				u <<= 8 * ((pos / 8) % 4);
+				state[pos / 32] ^= u;
 
-				bufferFilled += bytesToFill;
-				offset += bytesToFill;
-				count -= bytesToFill;
+				start += 1;
+				count -= 1;
+				pos += 8;
 
-				bufferOffset = 0;
-				while (bufferFilled >= BlockSizeInBytes)
+				if (pos == 8 * BlockSizeInBytes)
 				{
-					u = BytesToUInt32(buffer, bufferOffset);
-					u <<= 8 * ((BlockSizeInBytes / 8) % 4);
-					state[BlockSizeInBytes / 32] ^= u;
-					TransformBlock(buffer, bufferOffset);
-
-					bufferFilled -= BlockSizeInBytes;
-					bufferOffset += BlockSizeInBytes;
+					TransformBlock();
+					pos = 0;
 				}
-				if (bufferFilled > 0)
-				{
-					Buffer.BlockCopy(buffer, bufferOffset, buffer, 0, bufferFilled);
-				}
-
-			} while (0 < count && offset < array.Length);
+			}
 		}
 
 		protected override byte[] HashFinal ()
@@ -172,26 +135,17 @@ namespace Crypto
 			
 			if (!isInitialized) Initialize();
 
-			for (int i = bufferFilled; i < BlockSizeInBytes; ++i) buffer[i] = 0x00;
-
-			uint u = (uint)(128 >> (bufferFilled % 8));
-			u <<= 8 * ((bufferFilled / 8) % 4);
-			state[bufferFilled / 32] ^= u;
-			TransformBlock(buffer, 0);
+			var u = (uint)(128 >> (pos % 8));
+			u <<= 8 * ((pos / 8) % 4);
+			state[pos / 32] ^= u;
+			TransformBlock();
 
 			state[31] ^= 1U;
 			TransformBlock();
 			TransformBlock();
-
-			if (BitConverter.IsLittleEndian)
-			{
-				Buffer.BlockCopy(state, 0, hash, 0, HashSizeInBytes);
-			}
-			else
-			{
-				for (int i = 0; i < HashSizeInUInt32; ++i)
-					UInt32ToBytes(state[i], hash, i << 2);
-			}
+			
+			for (int i = 0; i < HashSizeInBytes; ++i) 
+				hash[i] = (byte)(state[i / 4] >> (8 * (i % 4)));
 
 			isInitialized = false;
 		}
@@ -218,15 +172,8 @@ namespace Crypto
 
 				// Output
 				var hash = new byte[HashSizeInBytes];
-				if (BitConverter.IsLittleEndian)
-				{
-					Buffer.BlockCopy(state, 0, hash, 0, HashSizeInBytes);
-				}
-				else
-				{
-					for (int i = 0; i < HashSizeInUInt32; ++i)
-						UInt32ToBytes(state[i], hash, i << 2);
-				}
+				for (int i = 0; i < HashSizeInBytes; ++i) 
+					hash[i] = (byte)(state[i / 4] >> (8 * (i % 4)));
 				return hash;
 			}
 		}
@@ -234,26 +181,8 @@ namespace Crypto
 		// Beware. A ROTATE method would be nice, but this halfes the speed of CubeHash.cs
 		// static uint ROTATE(uint a, int b) { return ((a << b) | (a >> (32 - b))); }
 
-		protected virtual void TransformBlock()
+		protected void TransformBlock()
 		{
-			TransformBlock(null, 0);
-		}
-
-		protected virtual void TransformBlock(byte[] data, int start)
-		{
-			if (data != null)
-			{
-				if (BitConverter.IsLittleEndian)
-				{
-					Buffer.BlockCopy(data, start, state, 0, BlockSizeInBytes);
-				}
-				else
-				{
-					for (int i = 0; i < BlockSizeInUInt32; i++)
-						state[i] ^= BytesToUInt32(data, start + (i << 2));
-				}
-			}
-
 			uint x00 = state[0], x01 = state[1], x02 = state[2], x03 = state[3];
 			uint x04 = state[4], x05 = state[5], x06 = state[6], x07 = state[7];
 			uint x08 = state[8], x09 = state[9], x0A = state[10], x0B = state[11];
@@ -345,7 +274,7 @@ namespace Crypto
 				y1 = x10; y0 = x11; y3 = x12; y2 = x13;
 				y5 = x14; y4 = x15; y7 = x16; y6 = x17;
 				y9 = x18; y8 = x19; yB = x1A; yA = x1B;
-				yD = x1C; yC = x1D; yE = x1E; yF = x1F;
+				yD = x1C; yC = x1D; yF = x1E; yE = x1F;
 
 				x10 = y0; x11 = y1; x12 = y2; x13 = y3;
 				x14 = y4; x15 = y5; x16 = y6; x17 = y7;
