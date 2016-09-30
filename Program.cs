@@ -55,9 +55,6 @@ namespace Crypto
 			/**/
 
 			byte[] hashValue;
-
-			// using (var hash = new CubeHash()) value = hash.ComputeHash(bytes);
-
 			using (var fileIn = new FileStream(inFile.FullName, FileMode.Open))
 			// using (var fileOut = new FileStream(outFile.FullName))
 			using (var hash = new CubeHash512())
