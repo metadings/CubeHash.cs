@@ -19,6 +19,11 @@ namespace Crypto
 				CubeHash512(dictionary);
 				return;
 			}
+			if (command.Equals("CubeHash16", StringComparison.OrdinalIgnoreCase))
+			{
+				CubeHash16(dictionary);
+				return;
+			}
 
 			string format =
 					"  HELP: ./CubeHash.exe --In=./Hallo.txt -- CubeHash512{0}"
@@ -83,6 +88,58 @@ namespace Crypto
 			Console.WriteLine();
 		}
 
+		public static void CubeHash16(IDictionary<string, string> dictionary)
+		{
+			FileInfo inFile = null;
+			if (dictionary.ContainsKey("In"))
+			if (File.Exists(dictionary["In"]))
+				inFile = new FileInfo(dictionary["In"]);
+			if (inFile == null || !inFile.Exists) {
+				Console.WriteLine("CubeHash16: --In file not found");
+				return;
+			}
+
+			/* FileInfo outFile;
+			if (dictionary.ContainsKey("Out"))
+			if (File.Exists(dictionary["Out"]))
+				outFile = new FileInfo(dictionary["Out"]);
+			// if (!outFile.Exists) throw new FileNotFoundException("Out (file) not found"); /**/
+
+			/* string inDir = inFile.DirectoryName;
+			string inFileName = inFile.Name;
+			string inFileExt = inFile.Extension;
+
+			var outFile = new FileInfo(inDir + inFileName + ".Blake2B" + inFileExt);
+			/**/
+
+			byte[] hashValue;
+			using (var fileIn = new FileStream(inFile.FullName, FileMode.Open))
+				// using (var fileOut = new FileStream(outFile.FullName))
+			using (var hash = new CubeHash(16, 8))
+			{
+				var buffer = new byte[512];
+				int bufferL, fileI = 0;
+				long fileL = inFile.Length;
+				do
+				{
+					bufferL = fileIn.Read(buffer, 0, buffer.Length);
+
+					if (bufferL > 0)
+					{
+						hash.Core(buffer, 0, bufferL);
+					}
+
+					fileL -= bufferL;
+					fileI += bufferL;
+
+				} while(0 < fileL);
+
+				hashValue = hash.Final();
+			}
+
+			foreach (byte v in hashValue) Console.Write("{0:x2}", v);
+			Console.WriteLine();
+		}
 
 
 		static Dictionary<string, string> ReadConsoleArguments(string[] args, out int argsI, out string command)

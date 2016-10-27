@@ -26,7 +26,7 @@ namespace Crypto
 
 	public class CubeHash : HashAlgorithm // IDisposable
 	{
-		private readonly int hashSize;
+		private readonly int hashSize = 512;
 
 		public override int HashSize { get { return hashSize; } }
 
@@ -34,9 +34,9 @@ namespace Crypto
 
 		public int HashSizeInUInt32 { get { return HashSizeInBytes / 4; } }
 
-		public const int BlockSizeInBytes = 32;
+		public readonly int BlockSizeInBytes = 32;
 
-		public const int BlockSizeInUInt32 = BlockSizeInBytes / 4;
+		public int BlockSizeInUInt32 { get { return BlockSizeInBytes / 4; } }
 
 		private int pos;
 
@@ -44,11 +44,26 @@ namespace Crypto
 
 		public const int ROUNDS = 16;
 
-		public CubeHash() : this(512) { }
+		public CubeHash() { }
 
-		public CubeHash(int hashSize)
+		public CubeHash(int hashSizeInBits)
+			: this()
 		{
-			this.hashSize = hashSize;
+			if (hashSizeInBits < 1 || hashSizeInBits > 512)
+				throw new ArgumentOutOfRangeException("hashSizeInBits");
+			if (hashSizeInBits % 8 != 0)
+				throw new ArgumentOutOfRangeException("hashSizeInBits", "must be a multiple of 8");
+			
+			this.hashSize = hashSizeInBits;
+		}
+
+		public CubeHash(int hashSizeInBits, int blockSizeInBytes)
+			: this(hashSizeInBits)
+		{
+			if (blockSizeInBytes < 1)
+				throw new ArgumentOutOfRangeException("blockSizeInBytes");
+			
+			this.BlockSizeInBytes = blockSizeInBytes;
 		}
 
 		private bool isInitialized = false;
@@ -60,8 +75,8 @@ namespace Crypto
 			isInitialized = true;
 
 			state[0] = (uint)HashSizeInBytes;
-			state[1] = BlockSizeInBytes;
-			state[2] = ROUNDS;
+			state[1] = (uint)BlockSizeInBytes;
+			state[2] = (uint)ROUNDS;
 			TransformBlock();
 		}
 
