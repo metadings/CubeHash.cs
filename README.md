@@ -110,4 +110,7 @@ using System.Text;
 
 ~/CubeHash.cs/bin/Debug $ mono ./CubeHash.exe --in=./Hallo.txt
 8e335ae82903d3d6557d60e6a7f231e54443f2ad2226e5c1f2db8f8d0112ada28637d9be275171a47e80b22f8aea716e97850083a9d27f361026501f2251e05b
+
+~/CubeHash.cs/bin/Debug $ mono ./CubeHash.exe --in=./Hallo.txt CubeHash256
+c1f8e0e6a7f49697c16d86894e06c0d9f286532ec0e64de2277a0a14ca167e01
 ```

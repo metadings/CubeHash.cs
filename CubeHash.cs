@@ -16,13 +16,21 @@ using System.Security.Cryptography;
 
 namespace Crypto
 {
-	public class CubeHash224 : CubeHash { public CubeHash224() : base(224) { } }
+	public class CubeHash81 : CubeHash { public CubeHash81() : base(8, 256, 1) { } }
+	public class CubeHash82 : CubeHash { public CubeHash82() : base(8, 256, 2) { } }
+	public class CubeHash84 : CubeHash { public CubeHash84() : base(8, 256, 4) { } }
+	public class CubeHash88 : CubeHash { public CubeHash88() : base(8, 256, 8) { } }
+	public class CubeHash816 : CubeHash { public CubeHash816() : base(8, 256, 16) { } }
+	public class CubeHash256 : CubeHash { public CubeHash256() : base(8, 256, 16) { } }
+	public class CubeHash832 : CubeHash { public CubeHash832() : base(8, 256, 32) { } }
 
-	public class CubeHash256 : CubeHash { public CubeHash256() : base(256) { } }
-
-	public class CubeHash384 : CubeHash { public CubeHash384() : base(384) { } }
-
-	public class CubeHash512 : CubeHash { public CubeHash512() : base(512) { } }
+	public class CubeHash161 : CubeHash { public CubeHash161() : base(16, 512, 1) { } }
+	public class CubeHash162 : CubeHash { public CubeHash162() : base(16, 512, 2) { } }
+	public class CubeHash164 : CubeHash { public CubeHash164() : base(16, 512, 4) { } }
+	public class CubeHash168 : CubeHash { public CubeHash168() : base(16, 512, 8) { } }
+	public class CubeHash1616 : CubeHash { public CubeHash1616() : base(16, 512, 16) { } }
+	public class CubeHash1632 : CubeHash { public CubeHash1632() : base(16, 512, 32) { } }
+	public class CubeHash512 : CubeHash { public CubeHash512() : base(16, 512, 32) { } }
 
 	public class CubeHash : HashAlgorithm // IDisposable
 	{
@@ -32,22 +40,21 @@ namespace Crypto
 
 		public int HashSizeInBytes { get { return hashSize / 8; } }
 
-		public int HashSizeInUInt32 { get { return HashSizeInBytes / 4; } }
+		// public int HashSizeInUInt32 { get { return HashSizeInBytes / 4; } }
 
 		public readonly int BlockSizeInBytes = 32;
 
-		public int BlockSizeInUInt32 { get { return BlockSizeInBytes / 4; } }
+		// public int BlockSizeInUInt32 { get { return BlockSizeInBytes / 4; } }
 
 		private int pos;
 
 		private readonly uint[] state = new uint[32];
 
-		public const int ROUNDS = 16;
+		public readonly int ROUNDS = 16;
 
 		public CubeHash() { }
 
 		public CubeHash(int hashSizeInBits)
-			: this()
 		{
 			if (hashSizeInBits < 1 || hashSizeInBits > 512)
 				throw new ArgumentOutOfRangeException("hashSizeInBits");
@@ -64,6 +71,15 @@ namespace Crypto
 				throw new ArgumentOutOfRangeException("blockSizeInBytes");
 			
 			this.BlockSizeInBytes = blockSizeInBytes;
+		}
+
+		public CubeHash(int rounds, int hashSizeInBits, int blockSizeInBytes)
+			: this(hashSizeInBits, blockSizeInBytes)
+		{
+			if (rounds < 1)
+				throw new ArgumentOutOfRangeException("rounds");
+
+			this.ROUNDS = rounds;
 		}
 
 		private bool isInitialized = false;

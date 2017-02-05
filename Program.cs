@@ -19,18 +19,19 @@ namespace Crypto
 				CubeHash512(dictionary);
 				return;
 			}
-			if (command.Equals("CubeHash16", StringComparison.OrdinalIgnoreCase))
+			if (command.Equals("CubeHash256", StringComparison.OrdinalIgnoreCase))
 			{
-				CubeHash16(dictionary);
+				CubeHash256(dictionary);
 				return;
 			}
 
 			string format =
-					"  HELP: ./CubeHash.exe --In=./Hallo.txt -- CubeHash512{0}"
+				"  HELP: ./CubeHash.exe --In=./Hallo.txt -- CubeHash512{0}"
 				+	"        ./CubeHash.exe [ --option=value ] [ -- ] [ command ]{0}"
 				+	"{0}"
-				+	"   COMMAND: CubeHash512{0}"
-				+	"            Requires option --In=./FileName.txt.{0}";
+				+	"    Option: --In=./FileName.txt.{0}{0}"
+				+	"{0}"
+				+	"   Commands: CubeHash512, CubeHash256";
 			
 			Console.WriteLine(format, Environment.NewLine);
 		}
@@ -88,14 +89,14 @@ namespace Crypto
 			Console.WriteLine();
 		}
 
-		public static void CubeHash16(IDictionary<string, string> dictionary)
+		public static void CubeHash256(IDictionary<string, string> dictionary)
 		{
 			FileInfo inFile = null;
 			if (dictionary.ContainsKey("In"))
 			if (File.Exists(dictionary["In"]))
 				inFile = new FileInfo(dictionary["In"]);
 			if (inFile == null || !inFile.Exists) {
-				Console.WriteLine("CubeHash16: --In file not found");
+				Console.WriteLine("CubeHash256: --In file not found");
 				return;
 			}
 
@@ -115,9 +116,9 @@ namespace Crypto
 			byte[] hashValue;
 			using (var fileIn = new FileStream(inFile.FullName, FileMode.Open))
 				// using (var fileOut = new FileStream(outFile.FullName))
-			using (var hash = new CubeHash(16, 8))
+			using (var hash = new CubeHash256())
 			{
-				var buffer = new byte[512];
+				var buffer = new byte[256];
 				int bufferL, fileI = 0;
 				long fileL = inFile.Length;
 				do
