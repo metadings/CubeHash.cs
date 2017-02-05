@@ -4,10 +4,9 @@
 	Uli Riehm <metadings@live.de>
 	Public Domain
 
-	Based on supercop-20141124/crypto_hash/cubehash512/simple
-	     and supercop-20141124/crypto_hash/cubehash512/unrolled2
+	based on supercop-20141124/crypto_hash/cubehash512/unrolled2
 
-	20081110, 20100726
+	20100726
 	D. J. Bernstein
 	Public domain.
 */
