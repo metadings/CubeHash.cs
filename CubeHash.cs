@@ -16,20 +16,36 @@ using System.Security.Cryptography;
 namespace Crypto
 {
 	public class CubeHash81 : CubeHash { public CubeHash81() : base(8, 256, 1) { } }
+
 	public class CubeHash82 : CubeHash { public CubeHash82() : base(8, 256, 2) { } }
+
 	public class CubeHash84 : CubeHash { public CubeHash84() : base(8, 256, 4) { } }
+
 	public class CubeHash88 : CubeHash { public CubeHash88() : base(8, 256, 8) { } }
+
 	public class CubeHash816 : CubeHash { public CubeHash816() : base(8, 256, 16) { } }
+
+	// CubeHash256: 16 bytes hash sourcecode input, 8 rounds, 256 bits (32 bytes) hash value output
 	public class CubeHash256 : CubeHash { public CubeHash256() : base(8, 256, 16) { } }
+
 	public class CubeHash832 : CubeHash { public CubeHash832() : base(8, 256, 32) { } }
 
+
 	public class CubeHash161 : CubeHash { public CubeHash161() : base(16, 512, 1) { } }
+
 	public class CubeHash162 : CubeHash { public CubeHash162() : base(16, 512, 2) { } }
+
 	public class CubeHash164 : CubeHash { public CubeHash164() : base(16, 512, 4) { } }
+
 	public class CubeHash168 : CubeHash { public CubeHash168() : base(16, 512, 8) { } }
+
 	public class CubeHash1616 : CubeHash { public CubeHash1616() : base(16, 512, 16) { } }
+
 	public class CubeHash1632 : CubeHash { public CubeHash1632() : base(16, 512, 32) { } }
+
+	// CubeHash512: 32 bytes hash sourcecode input, 16 rounds, 512 bits (64 bytes) hash value output
 	public class CubeHash512 : CubeHash { public CubeHash512() : base(16, 512, 32) { } }
+
 
 	public class CubeHash : HashAlgorithm // IDisposable
 	{
@@ -51,11 +67,12 @@ namespace Crypto
 
 		public readonly int ROUNDS = 16;
 
+		// CubeHash512()
 		public CubeHash() { }
 
 		public CubeHash(int hashSizeInBits)
 		{
-			if (hashSizeInBits < 1 || hashSizeInBits > 512)
+			if (hashSizeInBits < 8) // || hashSizeInBits > 512)
 				throw new ArgumentOutOfRangeException("hashSizeInBits");
 			if (hashSizeInBits % 8 != 0)
 				throw new ArgumentOutOfRangeException("hashSizeInBits", "must be a multiple of 8");
@@ -75,7 +92,7 @@ namespace Crypto
 		public CubeHash(int rounds, int hashSizeInBits, int blockSizeInBytes)
 			: this(hashSizeInBits, blockSizeInBytes)
 		{
-			if (rounds < 1)
+			if (rounds < 8)
 				throw new ArgumentOutOfRangeException("rounds");
 
 			this.ROUNDS = rounds;
