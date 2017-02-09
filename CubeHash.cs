@@ -44,7 +44,7 @@ namespace Crypto
 	public class CubeHash1632 : CubeHash { public CubeHash1632() : base(16, 512, 32) { } }
 
 	// CubeHash512: 32 bytes hash sourcecode input, 16 rounds, 512 bits (64 bytes) hash value output
-	public class CubeHash512 : CubeHash { public CubeHash512() : base(16, 512, 32) { } }
+	public class CubeHash512 : CubeHash { public CubeHash512() : base() { } }
 
 
 	public class CubeHash : HashAlgorithm // IDisposable
