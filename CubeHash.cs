@@ -89,7 +89,7 @@ namespace Crypto
 			this.BlockSizeInBytes = blockSizeInBytes;
 		}
 
-		public CubeHash(int rounds, int hashSizeInBits, int blockSizeInBytes)
+		public CubeHash(int hashSizeInBits, int blockSizeInBytes, int rounds)
 			: this(hashSizeInBits, blockSizeInBytes)
 		{
 			if (rounds < 8)
