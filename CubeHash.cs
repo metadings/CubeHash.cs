@@ -67,7 +67,7 @@ namespace Crypto
 
 		public readonly int ROUNDS = 16;
 
-		// CubeHash512()
+		// CubeHash512
 		public CubeHash() { }
 
 		public CubeHash(int hashSizeInBits)
