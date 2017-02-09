@@ -15,33 +15,33 @@ using System.Security.Cryptography;
 
 namespace Crypto
 {
-	public class CubeHash81 : CubeHash { public CubeHash81() : base(8, 256, 1) { } }
+	public class CubeHash81 : CubeHash { public CubeHash81() : base(256, 1, 8) { } }
 
-	public class CubeHash82 : CubeHash { public CubeHash82() : base(8, 256, 2) { } }
+	public class CubeHash82 : CubeHash { public CubeHash82() : base(256, 2, 8) { } }
 
-	public class CubeHash84 : CubeHash { public CubeHash84() : base(8, 256, 4) { } }
+	public class CubeHash84 : CubeHash { public CubeHash84() : base(256, 4, 8) { } }
 
-	public class CubeHash88 : CubeHash { public CubeHash88() : base(8, 256, 8) { } }
+	public class CubeHash88 : CubeHash { public CubeHash88() : base(256, 8, 8) { } }
 
-	public class CubeHash816 : CubeHash { public CubeHash816() : base(8, 256, 16) { } }
+	public class CubeHash816 : CubeHash { public CubeHash816() : base(256, 16, 8) { } }
 
 	// CubeHash256: 16 bytes hash sourcecode input, 8 rounds, 256 bits (32 bytes) hash value output
-	public class CubeHash256 : CubeHash { public CubeHash256() : base(8, 256, 16) { } }
+	public class CubeHash256 : CubeHash { public CubeHash256() : base(256, 16, 8) { } }
 
-	public class CubeHash832 : CubeHash { public CubeHash832() : base(8, 256, 32) { } }
+	public class CubeHash832 : CubeHash { public CubeHash832() : base(256, 32, 8) { } }
 
 
-	public class CubeHash161 : CubeHash { public CubeHash161() : base(16, 512, 1) { } }
+	public class CubeHash161 : CubeHash { public CubeHash161() : base(512, 1, 16) { } }
 
-	public class CubeHash162 : CubeHash { public CubeHash162() : base(16, 512, 2) { } }
+	public class CubeHash162 : CubeHash { public CubeHash162() : base(512, 2, 16) { } }
 
-	public class CubeHash164 : CubeHash { public CubeHash164() : base(16, 512, 4) { } }
+	public class CubeHash164 : CubeHash { public CubeHash164() : base(512, 4, 16) { } }
 
-	public class CubeHash168 : CubeHash { public CubeHash168() : base(16, 512, 8) { } }
+	public class CubeHash168 : CubeHash { public CubeHash168() : base(512, 8, 16) { } }
 
-	public class CubeHash1616 : CubeHash { public CubeHash1616() : base(16, 512, 16) { } }
+	public class CubeHash1616 : CubeHash { public CubeHash1616() : base(512, 16, 16) { } }
 
-	public class CubeHash1632 : CubeHash { public CubeHash1632() : base(16, 512, 32) { } }
+	public class CubeHash1632 : CubeHash { public CubeHash1632() : base(512, 32, 16) { } }
 
 	// CubeHash512: 32 bytes hash sourcecode input, 16 rounds, 512 bits (64 bytes) hash value output
 	public class CubeHash512 : CubeHash { public CubeHash512() : base() { } }
